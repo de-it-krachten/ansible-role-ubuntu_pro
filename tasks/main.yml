@@ -60,3 +60,4 @@
     - name: Execute hardening
       ansible.builtin.include_tasks:
         file: usg.yml
+      when: ubuntu_pro_usg | bool
