@@ -59,12 +59,12 @@
         cmd: >
           usg audit
           --tailoring-file {{ ubuntu_pro_usg_tailoring_file }}
-          --html-file /tmp/{{ inventory_hostname }}.html
+          --html-file /root/usg-report.html
           {{ ubuntu_pro_usg_profile }}
       changed_when: false
 
 - name: Retrieve audit report
   ansible.builtin.fetch:
-    src: /tmp/{{ inventory_hostname }}.html
-    dest: /tmp/{{ inventory_hostname }}.html
+    src: /root/usg-report.html
+    dest: /tmp/usg-{{ inventory_hostname }}.html
     flat: true
