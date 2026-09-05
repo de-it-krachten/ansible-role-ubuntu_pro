@@ -48,7 +48,6 @@
         cmd: >-
           usg fix
           --tailoring-file {{ ubuntu_pro_usg_tailoring_file }}
-          {{ ubuntu_pro_usg_profile }}
       changed_when: true
 
     - name: Reboot server
@@ -60,7 +59,6 @@
           usg audit
           --tailoring-file {{ ubuntu_pro_usg_tailoring_file }}
           --html-file /root/usg-report.html
-          {{ ubuntu_pro_usg_profile }}
       changed_when: false
 
 - name: Retrieve audit report
