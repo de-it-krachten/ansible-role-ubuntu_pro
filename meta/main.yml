@@ -1,0 +1,17 @@
+---
+
+galaxy_info:
+  role_name: ubuntu_pro
+  namespace: de_it_krachten
+  description: ubuntu_pro
+  author: Mark van Huijstee
+  company: De IT Krachten BV
+  license: MIT
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
+dependencies: []
