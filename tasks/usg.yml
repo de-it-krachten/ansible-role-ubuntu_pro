@@ -1,0 +1,70 @@
+---
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: usg
+    state: present
+    update_cache: true
+  become: true
+
+- name: Deploy tailoring file
+  ansible.builtin.template:
+    src: "{{ ubuntu_pro_usg_tailoring_template }}"
+    dest: "{{ ubuntu_pro_usg_tailoring_file }}"
+    mode: '0644'
+  when:
+    - ubuntu_pro_usg_tailoring_template is defined
+    - ubuntu_pro_usg_tailoring_file is defined
+
+- name: Apply hardening w/out tailoring
+  become: true
+  when: ubuntu_pro_usg_tailoring_file | default('') | length == 0
+  block:
+
+    - name: Apply hardening w/out tailoring
+      ansible.builtin.command:
+        cmd: >-
+          usg fix {{ ubuntu_pro_usg_profile }}
+      changed_when: true
+
+    - name: Reboot server
+      ansible.builtin.reboot:
+
+    - name: Execute audit
+      ansible.builtin.command:
+        cmd: >
+          usg audit
+          --html-file /tmp/{{ inventory_hostname }}.html
+          {{ ubuntu_pro_usg_profile }}
+      changed_when: false
+
+- name: Apply hardening w/ tailoring
+  become: true
+  when: ubuntu_pro_usg_tailoring_file | default('') | length > 0
+  block:
+
+    - name: Apply hardening w/ tailoring
+      ansible.builtin.command:
+        cmd: >-
+          usg fix
+          --tailoring-file {{ ubuntu_pro_usg_tailoring_file }}
+          {{ ubuntu_pro_usg_profile }}
+      changed_when: true
+
+    - name: Reboot server
+      ansible.builtin.reboot:
+
+    - name: Execute audit
+      ansible.builtin.command:
+        cmd: >
+          usg audit
+          --tailoring-file {{ ubuntu_pro_usg_tailoring_file }}
+          --html-file /tmp/{{ inventory_hostname }}.html
+          {{ ubuntu_pro_usg_profile }}
+      changed_when: false
+
+- name: Retrieve audit report
+  ansible.builtin.fetch:
+    src: /tmp/{{ inventory_hostname }}.html
+    dest: /tmp/{{ inventory_hostname }}.html
+    flat: true

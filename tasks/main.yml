@@ -10,7 +10,7 @@
   block:
 
     - name: Show message about this role
-      ansible.builtin.debug: 
+      ansible.builtin.debug:
         msg: This role only works on Ubuntu LTS versions
 
 - name: Execute Ubuntu Pro code
@@ -26,3 +26,35 @@
       register: __ubuntu_pro_attach
       changed_when: __ubuntu_pro_attach.stderr is not search('This machine is already attached to')
       failed_when: __ubuntu_pro_attach.rc == 1 or __ubuntu_pro_attach.rc > 2
+
+    - name: Get services status
+      ansible.builtin.command:
+        cmd: pro status
+      changed_when: false
+      register: __pro_status
+
+    - name: Enable services
+      ansible.builtin.command:
+        cmd: pro enable {{ item.name }}
+      changed_when: true
+      when:
+        - item.enabled | bool
+        - __pro_status.stdout is search(item.name+'\s+yes\s+disabled')
+      loop: "{{ ubuntu_pro_services }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Disable services
+      ansible.builtin.command:
+        cmd: pro disable {{ item.name }}
+      changed_when: true
+      when:
+        - not item.enabled | bool
+        - __pro_status.stdout is search(item.name+'\s+yes\s+enabled')
+      loop: "{{ ubuntu_pro_services }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Execute hardening
+      ansible.builtin.include_tasks:
+        file: usg.yml

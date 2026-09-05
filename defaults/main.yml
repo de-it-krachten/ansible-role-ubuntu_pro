@@ -1,1 +1,10 @@
 ---
+
+# Services to enable/disable:
+ubuntu_pro_services:
+  - name: usg
+    enabled: true
+
+ubuntu_pro_usg_profile: cis_level1_server
+
+# ubuntu_pro_usg_tailoring_file: /root/usg-tailoring.xml
