@@ -9,7 +9,7 @@ ubuntu_pro_usg_profile: cis_level1_server
 
 
 ubuntu_pro_usg_tailoring_file: /root/usg-tailoring.xml
-ubuntu_pro_usg_tailoring_template: templates/tailor-{{ ansible_facts['distribution_version'] | replace('.') }}.xml.j2
+ubuntu_pro_usg_tailoring_template: templates/tailor-{{ ansible_facts['distribution_version'] | replace('.', '') }}.xml.j2
 
 ubuntu_pro_usg_vars:
   - name: var_network_filtering_service
