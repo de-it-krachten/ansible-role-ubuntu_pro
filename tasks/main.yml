@@ -6,16 +6,40 @@
       - ubuntu_pro_token is defined
 
 - name: Show message when not on Ubuntu LTS
-  when: ansible_distribution != 'Ubuntu' or ansible_distribution_version is not search('^(18|20|22|24|26|28)\.04')
+  when: ansible_facts['distribution'] != 'Ubuntu' or ansible_facts['distribution_version'] is not search('^(18|20|22|24|26|28)\.04')
   block:
 
     - name: Show message about this role
-      ansible.builtin.debug: 
+      ansible.builtin.debug:
         msg: This role only works on Ubuntu LTS versions
 
 - name: Execute Ubuntu Pro code
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version is search('^(18|20|22|24|26|28)\.04')
+  when:
+    - ansible_facts['distribution'] == 'Ubuntu'
+    - ansible_facts['distribution_version'] is search('^(18|20|22|24|26|28)\.04')
   block:
+
+    - name: Get status for Ubuntu pro
+      ansible.builtin.command:
+        cmd: pro status --format yaml
+      changed_when: false
+      become: true
+      become_user: root
+      register: __ubuntu_pro_status
+
+    - name: Import status
+      ansible.builtin.set_fact:
+        ubuntu_pro_status: "{{ __ubuntu_pro_status.stdout | from_yaml }}"
+
+    - name: Detach if pro is not registed with the correct contract
+      ansible.builtin.command:
+        cmd: pro detach --assume-yes
+      when:
+        - ubuntu_pro_status.account.name != ""
+        - ubuntu_pro_status.account.name != ubuntu_pro_account
+      changed_when: true
+      become: true
+      become_user: root
 
     - name: Connect to Ubuntu pro
       ansible.builtin.command:
@@ -26,3 +50,36 @@
       register: __ubuntu_pro_attach
       changed_when: __ubuntu_pro_attach.stderr is not search('This machine is already attached to')
       failed_when: __ubuntu_pro_attach.rc == 1 or __ubuntu_pro_attach.rc > 2
+
+    - name: Get services status
+      ansible.builtin.command:
+        cmd: pro status
+      changed_when: false
+      register: __pro_status
+
+    - name: Enable services
+      ansible.builtin.command:
+        cmd: pro enable {{ item.name }}
+      changed_when: true
+      when:
+        - item.enabled | bool
+        - __pro_status.stdout is search(item.name+'\s+yes\s+disabled')
+      loop: "{{ ubuntu_pro_services }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Disable services
+      ansible.builtin.command:
+        cmd: pro disable {{ item.name }}
+      changed_when: true
+      when:
+        - not item.enabled | bool
+        - __pro_status.stdout is search(item.name+'\s+yes\s+enabled')
+      loop: "{{ ubuntu_pro_services }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Execute hardening
+      ansible.builtin.include_tasks:
+        file: usg.yml
+      when: ubuntu_pro_usg | bool
