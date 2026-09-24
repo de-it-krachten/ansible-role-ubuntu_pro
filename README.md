@@ -32,7 +32,31 @@ Note:
 ## Role Variables
 ### defaults/main.yml
 <pre><code>
+# Services to enable/disable:
+ubuntu_pro_services:
+  - name: usg
+    enabled: true
 
+# Execute hardening
+ubuntu_pro_usg: false
+
+# Hardening profile
+ubuntu_pro_usg_profile: cis_level1_server
+
+# Hardening tailoring template
+ubuntu_pro_usg_tailoring_template: >-
+  templates/tailor-{{ ubuntu_pro_usg_profile }}-{{ ansible_facts['distribution_version'] }}.xml.j2
+
+# Hardening tailoring file
+ubuntu_pro_usg_tailoring_file: /root/usg-tailoring.xml
+
+# Hardening tailoring (deviation from default)
+ubuntu_pro_usg_values:
+  - name: var_network_filtering_service
+    value: ufw
+  - name: var_timesync_service
+    value: chronyd
+ubuntu_pro_usg_rules: []
 </pre></code>
 
 
