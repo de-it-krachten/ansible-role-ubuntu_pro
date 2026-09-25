@@ -3,6 +3,7 @@
 - name: Assertions
   ansible.builtin.assert:
     that:
+      - ubuntu_pro_account is defined
       - ubuntu_pro_token is defined
 
 - name: Show message when not on Ubuntu LTS
