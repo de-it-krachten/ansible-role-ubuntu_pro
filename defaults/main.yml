@@ -24,4 +24,10 @@ ubuntu_pro_usg_values:
     value: ufw
   - name: var_timesync_service
     value: chronyd
+
+# Rules to activate (selected=`true`) or deactive (`false`)
+# example:
+# ubuntu_pro_usg_rules:
+#  - name: accounts_umask_etc_bashrc
+#     selected: false
 ubuntu_pro_usg_rules: []
