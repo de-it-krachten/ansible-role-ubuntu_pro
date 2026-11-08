@@ -30,7 +30,8 @@
 
     - name: Import status
       ansible.builtin.set_fact:
-        ubuntu_pro_status: "{{ __ubuntu_pro_status.stdout | from_yaml }}"
+        ubuntu_pro_status: >-
+          {{ __ubuntu_pro_status.stdout | from_yaml | to_json | from_json }}
 
     - name: Detach if pro is not registed with the correct contract
       ansible.builtin.command:
