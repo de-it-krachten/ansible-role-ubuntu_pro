@@ -65,6 +65,10 @@ platforms:
     supported: false
     ci: false
 
+# Github
+github:
+  molecule: false
+
 # Molecule
 molecule:
   requirements:
